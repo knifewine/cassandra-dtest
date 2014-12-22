@@ -2,7 +2,6 @@ import time
 import uuid
 import re
 from dtest import Tester, debug
-from pytools import since, require
 from pyassertions import assert_invalid
 from cassandra import Unauthorized, ConsistencyLevel
 from cassandra.query import SimpleStatement
@@ -38,7 +37,6 @@ class TestUserTypes(Tester):
             cursor.execute(query)
         assert re.search(message, cm.exception.message), "Expected: %s" % message
 
-    @since('2.1')
     def test_type_dropping(self):
         """
         Tests that a type cannot be dropped when in use, and otherwise can be dropped.
@@ -105,7 +103,6 @@ class TestUserTypes(Tester):
         rows = cursor.execute(stmt)
         self.assertEqual(0, len(rows))
 
-    @since('2.1')
     def test_nested_type_dropping(self):
         """
         Confirm a user type can't be dropped when being used by another user type.
@@ -159,7 +156,6 @@ class TestUserTypes(Tester):
         rows = cursor.execute(stmt)
         self.assertEqual(0, len(rows))
 
-    @since('2.1')
     def test_type_enforcement(self):
         """
         Confirm error when incorrect data type used for user type
@@ -210,7 +206,6 @@ class TestUserTypes(Tester):
         rows = cursor.execute(stmt)
         self.assertEqual(0, len(rows))
 
-    @since('2.1')
     def test_nested_user_types(self):
         """Tests user types within user types"""
         cluster = self.cluster
@@ -318,7 +313,6 @@ class TestUserTypes(Tester):
             items = rows[0][0]
             self.assertEqual(listify(items), [[[u'stuff3', [u'one_2_other', u'two_2_other']], [u'stuff4', [u'one_3_other', u'two_3_other']]]])
 
-    @since('2.1')
     def test_type_as_part_of_pkey(self):
         """Tests user types as part of a composite pkey"""
         # make sure we can define a table with a user type as part of the pkey
@@ -377,7 +371,6 @@ class TestUserTypes(Tester):
         self.assertEqual(first_name, u'Nero')
         self.assertEqual(like, u'arson')
 
-    @since('2.1')
     def test_type_secondary_indexing(self):
         """
         Confirm that user types are secondary-indexable
@@ -503,7 +496,6 @@ class TestUserTypes(Tester):
         self.assertEqual(first_name, u'Abraham')
         self.assertEqual(like, u'preserving unions')
 
-    @since('2.1')
     def test_type_keyspace_permission_isolation(self):
         """
         Confirm permissions are respected for types in different keyspaces
@@ -570,7 +562,6 @@ class TestUserTypes(Tester):
         rows = superuser_cursor.execute("SELECT * from system.schema_usertypes")
         self.assertEqual(0, len(rows))
 
-    @since('2.1')
     def test_nulls_in_user_types(self):
         """Tests user types with null values"""
         cluster = self.cluster
@@ -615,7 +606,6 @@ class TestUserTypes(Tester):
         rows = cursor.execute("SELECT my_item FROM bucket WHERE id=1")
         self.assertEqual(listify(rows[0]), [[u'test', None]])
 
-    @since('2.1')
     def test_no_counters_in_user_types(self):
         # CASSANDRA-7672
         cluster = self.cluster
@@ -636,7 +626,6 @@ class TestUserTypes(Tester):
 
         assert_invalid(cursor, stmt, 'A user type cannot contain counters')
 
-    @since('2.1')
     def test_type_as_clustering_col(self):
         """Tests user types as clustering column"""
         # make sure we can define a table with a user type as a clustering column
@@ -680,75 +669,3 @@ class TestUserTypes(Tester):
             res = cursor.execute("SELECT letterpair FROM letters where id = {}".format(_id))
 
             self.assertEqual(listify(res), [[[u'a', u'z'], [u'c', u'a'], [u'c', u'f'], [u'c', u'z'], [u'd', u'e'], [u'z', u'a']]])
-
-    @since('3.0')
-    @require('7423')
-    def udt_subfield_test(self):
-        cluster = self.cluster
-        cluster.populate(3).start()
-        node1, node2, node3 = cluster.nodelist()
-        session = self.patient_cql_connection(node1)
-        self.create_ks(session, 'user_types', 1)
-
-        #Check we can create non-frozen table
-        session.execute("CREATE TYPE udt (first text, second int, third int)")
-        session.execute("CREATE TABLE t (id int PRIMARY KEY, v udt)")
-
-        #Fill in a full UDT across two statements
-        #Ensure all subfields are set
-        session.execute("UPDATE t set v[first] = 'a' WHERE id=0")
-        session.execute("INSERT INTO t (id, v) VALUES (0, {third: 2, second: 1})")
-        rows = session.execute("SELECT * FROM t WHERE id = 0")
-        self.assertEqual(listify(rows[0]), [0, ['a', 1, 2]])
-
-        #Create a full udt
-        #Update a subfield on the udt
-        #Read back the updated udt
-        session.execute("INSERT INTO t (id, v) VALUES (0, {first: 'c', second: 3, third: 33})")
-        session.execute("UPDATE t set v[second] = 5 where id=0")
-        rows = session.execute("SELECT * FROM t WHERE id=0")
-        self.assertEqual(listify(rows[0]), [0, ['c', 5, 33]])
-
-        #Rewrite the entire udt
-        #Read back
-        session.execute("INSERT INTO t (id, v) VALUES (0, {first: 'alpha': second: 111, third: 100})")
-        rows = session.execute("SELECT * FROM t WHERE id=0")
-        self.assertEqual(listify(rows[0]), [0, ['alpha', 111, 100]])
-
-        #Send three subfield updates to udt
-        #Read back
-        session.execute("UPDATE t set v[first] = 'beta' WHERE id=0")
-        session.execute("UPDATE t set v[first] = 'delta' WHERE id=0")
-        session.execute("UPDATE t set v[second] = -10 WHERE id=0")
-        rows = session.execute("SELECT * FROM t WHERE id=0")
-        self.assertEqual(listify(rows[0]), [0, ['delta', -10, 100]])
-
-        #Send conflicting updates serially to different nodes
-        #Read back
-        session1 = self.exclusive_cql_connection(node1)
-        session2 = self.exclusive_cql_connection(node2)
-        session3 = self.exclusive_cql_connection(node3)
-
-        session1.execute("UPDATE user_types.t set v[third] = 101 WHERE id=0")
-        session2.execute("UPDATE user_types.t set v[third] = 102 WHERE id=0")
-        session2.execute("UPDATE user_types.t set v[third] = 103 WHERE id=0")
-        query = SimpleStatement("SELECT * FROM t WHERE id = 0", consistency_level=ConsistencyLevel.ALL)
-        rows = session.execute(query)
-        self.assertEqual(listify(rows[0]), [0, ['delta', -10, 103]])
-        session1.shutdown()
-        session2.shutdown()
-        session3.shutdown()
-
-        #Write full UDT, set one field to null, read back
-        session.execute("INSERT INTO t (id, v) VALUES (0, {first:'cass', second:3, third:0})")
-        session.execute("INSERT INTO t (id, v) VALUES (0, {first:null})")
-        rows = session.execute("SELECT * FROM t WHERE id=0")
-        self.assertEqual(listify(rows[0]), [0, [None, 3, 0]])
-
-        #Create UDT with collection, update just collection, read back
-        session.execute("CREATE TYPE uc (a int, b set<int>)")
-        session.execute("CREATE TABLE tc (id int PRIMARY KEY, v uc)")
-        session.execute("INSERT INTO tc (id, v) VALUES (0, {a:0, b:{1,2,3}})")
-        session.execute("UPDATE tc SET v[b] = v[b] + {4,5} where id=0")
-        rows = session.execute("SELECT * from tc WHERE id=0")
-        self.assertEqual(listify(rows[0]), [0, [0, [1,2,3,4,5]]])

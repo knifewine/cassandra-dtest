@@ -1,7 +1,6 @@
 # coding: utf-8
 
 from dtest import Tester
-from pytools import since
 from cassandra import ConsistencyLevel, WriteTimeout
 from cassandra.query import SimpleStatement
 
@@ -29,11 +28,9 @@ class TestPaxos(Tester):
             self.create_ks(cursor, 'ks', rf)
         return cursor
 
-    @since('2.0.6')
     def contention_test_multi_iterations(self):
         self._contention_test(8, 100)
 
-    @since('2.0.6')
     ##Warning, this test will require you to raise the open
     ##file limit on OSX. Use 'ulimit -n 1000'
     def contention_test_many_threds(self):

@@ -1,7 +1,6 @@
 import random, re, time, uuid
 
 from dtest import Tester, debug
-from pytools import since
 from pyassertions import assert_invalid
 from cassandra import InvalidRequest
 from cassandra.query import BatchStatement, SimpleStatement
@@ -43,7 +42,6 @@ class TestSecondaryIndexes(Tester):
         result = cursor.execute("SELECT * FROM users WHERE state='CA';")
         assert len(result) == 1, "Expecting 1 users, got" + str(result)
 
-    @since('2.1')
     def test_low_cardinality_indexes(self):
         """
         Checks that low-cardinality secondary index subqueries are executed
@@ -106,7 +104,6 @@ class TestSecondaryIndexes(Tester):
             result = cursor.execute("SELECT * FROM ks.cf WHERE b='1' LIMIT %d;" % (limit,))
             self.assertEqual(limit, len(result))
 
-    @since('2.1')
     def test_6924_dropping_ks(self):
         """Tests CASSANDRA-6924
 
@@ -144,7 +141,6 @@ class TestSecondaryIndexes(Tester):
             count = rows[0][0]
             self.assertEqual(count, 10)
 
-    @since('2.1')
     def test_6924_dropping_cf(self):
         """Tests CASSANDRA-6924
 
@@ -181,7 +177,6 @@ class TestSecondaryIndexes(Tester):
             count = rows[0][0]
             self.assertEqual(count, 10)
 
-    @since('2.0')
     def test_8280_validate_indexed_values(self):
         """Tests CASSANDRA-8280
 
@@ -267,7 +262,6 @@ class TestSecondaryIndexesOnCollections(Tester):
     def __init__(self, *args, **kwargs):
         Tester.__init__(self, *args, **kwargs)
 
-    @since('2.1')
     def test_list_indexes(self):
         """
         Checks that secondary indexes on lists work for querying.
@@ -363,7 +357,6 @@ class TestSecondaryIndexesOnCollections(Tester):
             self.assertEqual(str(db_uuids[0]), str(shared_uuid))
             self.assertEqual(str(db_uuids[1]), str(log_entry['unshared_uuid']))
 
-    @since('2.1')
     def test_set_indexes(self):
         """
         Checks that secondary indexes on sets work for querying.
@@ -455,7 +448,6 @@ class TestSecondaryIndexesOnCollections(Tester):
             self.assertTrue(shared_uuid in db_uuids)
             self.assertTrue(log_entry['unshared_uuid'] in db_uuids)
 
-    @since('2.1')
     def test_map_indexes(self):
         """
         Checks that secondary indexes on maps work for querying on both keys and values

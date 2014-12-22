@@ -4,7 +4,7 @@ from cassandra.query import SimpleStatement
 
 import random, time, uuid
 from pyassertions import assert_invalid, assert_one
-from pytools import rows_to_list, since
+from pytools import rows_to_list
 
 class TestCounters(Tester):
 
@@ -254,7 +254,6 @@ class TestCounters(Tester):
 
         assert_one(cursor, "SELECT pk, ck, value FROM compact_counter_table", [0, 'ck', 3])
 
-    @since('2.0')
     def drop_counter_column_test(self):
         """Test for CASSANDRA-7831"""
         cluster = self.cluster

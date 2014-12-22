@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from dtest import Tester, debug
-from pytools import since, require
 from ccmlib import common
 import subprocess
 import binascii
@@ -8,7 +7,7 @@ from decimal import Decimal
 import sys, os, datetime
 from uuid import UUID
 from distutils.version import LooseVersion
-from pytools import create_c1c2_table, insert_c1c2, since
+from pytools import create_c1c2_table, insert_c1c2
 
 class TestCqlsh(Tester):
 
@@ -363,7 +362,6 @@ VALUES (4, blobAsInt(0x), '', blobAsBigint(0x), 0x, blobAsBoolean(0x), blobAsDec
 
         self.assertTrue(expected in output, "Output \n {%s} \n doesn't contain expected\n {%s}" % (output, expected))
 
-    @since('2.0')
     def tracing_from_system_traces_test(self):
         self.cluster.populate(1).start()
 
@@ -387,7 +385,6 @@ VALUES (4, blobAsInt(0x), '', blobAsBigint(0x), 0x, blobAsBoolean(0x), blobAsDec
         out, err = self.run_cqlsh(node1, 'TRACING ON; SELECT * FROM system_traces.sessions')
         self.assertNotIn('Tracing session: ', out)
 
-    @since('2.1')
     def select_element_inside_udt_test(self):
         self.cluster.populate(1).start()
 
