@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from dtest import Tester, debug
-from pytools import since, require
 from ccmlib import common
 import subprocess
 import binascii
@@ -8,7 +7,7 @@ from decimal import Decimal
 import sys, os, datetime
 from uuid import UUID
 from distutils.version import LooseVersion
-from pytools import create_c1c2_table, insert_c1c2, since
+from pytools import create_c1c2_table, insert_c1c2
 
 class TestCqlsh(Tester):
 
@@ -363,7 +362,6 @@ VALUES (4, blobAsInt(0x), '', blobAsBigint(0x), 0x, blobAsBoolean(0x), blobAsDec
 
         self.assertTrue(expected in output, "Output \n {%s} \n doesn't contain expected\n {%s}" % (output, expected))
 
-    @since('2.0')
     def tracing_from_system_traces_test(self):
         self.cluster.populate(1).start()
 
@@ -386,41 +384,6 @@ VALUES (4, blobAsInt(0x), '', blobAsBigint(0x), 0x, blobAsBoolean(0x), blobAsDec
 
         out, err = self.run_cqlsh(node1, 'TRACING ON; SELECT * FROM system_traces.sessions')
         self.assertNotIn('Tracing session: ', out)
-
-    @since('2.1')
-    def select_element_inside_udt_test(self):
-        self.cluster.populate(1).start()
-
-        node1, = self.cluster.nodelist()
-        session = self.patient_cql_connection(node1)
-
-        self.create_ks(session, 'ks', 1)
-        session.execute("""
-            CREATE TYPE address (
-            street text,
-            city text,
-            zip_code int,
-            phones set<text>
-             );""")
-
-        session.execute("""CREATE TYPE fullname (
-            firstname text,
-            lastname text
-            );""")
-
-        session.execute("""CREATE TABLE users (
-            id uuid PRIMARY KEY,
-            name FROZEN <fullname>,
-            addresses map<text, FROZEN <address>>
-            );""")
-
-        session.execute("""INSERT INTO users (id, name)
-            VALUES (62c36092-82a1-3a00-93d1-46196ee77204, {firstname: 'Marie-Claude', lastname: 'Josset'});
-            """)
-
-        out, err = self.run_cqlsh(node1, "SELECT name.lastname FROM ks.users WHERE id=62c36092-82a1-3a00-93d1-46196ee77204")
-        self.assertNotIn('list index out of range', err)
-        ##If this assertion fails check CASSANDRA-7891
 
     def test_list_queries(self):
         config = {'authenticator': 'org.apache.cassandra.auth.PasswordAuthenticator',

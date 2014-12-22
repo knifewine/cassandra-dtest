@@ -1,5 +1,4 @@
 from dtest import Tester
-from pytools import since
 
 import os, sys, time, pytools
 from uuid import UUID
@@ -20,7 +19,6 @@ class TestCQL(Tester):
         self.create_ks(cursor, 'ks', 1)
         return cursor
 
-    @since("1.2")
     def batch_preparation_test(self):
         """ Test preparation of batch statement (#4202) """
         cursor = self.prepare()

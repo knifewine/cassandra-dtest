@@ -6,7 +6,6 @@ from thrift.protocol import TBinaryProtocol
 from thrift.Thrift import TApplicationException
 
 from dtest import Tester, debug, NUM_TOKENS, DISABLE_VNODES
-from pytools import since
 from thrift_bindings.v30 import Cassandra
 from thrift_bindings.v30.Cassandra import *
 
@@ -2008,7 +2007,6 @@ class TestMutations(ThriftTester):
         time.sleep(5)
         _assert_no_columnpath('key2', ColumnPath(column_family='Counter1', column='c1'))
 
-    @since('2.0')
     def test_range_deletion(self):
         """ Tests CASSANDRA-7990 """
         _set_keyspace('Keyspace1')
@@ -2194,15 +2192,6 @@ class TestMutations(ThriftTester):
         result = client.get_range_slices(cp, predicate, k_range, ConsistencyLevel.ONE)
         assert len(result[0].columns) == 1, result[0].columns
         assert result[0].columns[0].super_column.name == 'sc1'
-
-    @since('2.1')
-    def test_multi_slice(self):
-        _set_keyspace('Keyspace1')
-        _insert_six_columns('abc')
-        L = [result.column
-             for result in _big_multi_slice('abc')]
-        assert L == _MULTI_SLICE_COLUMNS, L
-
 
 class TestTruncate(ThriftTester):
     def test_truncate(self):

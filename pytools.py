@@ -156,26 +156,6 @@ def not_implemented(f):
     wrapped.__doc__ = f.__doc__
     return wrapped
 
-class since(object):
-    def __init__(self, cass_version, max_version=None):
-        self.cass_version = LooseVersion(cass_version)
-        self.max_version = max_version
-        if self.max_version is not None:
-            self.max_version = LooseVersion(self.max_version)
-
-    def __call__(self, f):
-        def wrapped(obj):
-            cluster_version = LooseVersion(obj.cluster.version())
-            if cluster_version < self.cass_version:
-                obj.skip("%s < %s" % (cluster_version, self.cass_version))
-            if self.max_version and \
-                    cluster_version[:len(self.max_version)] > self.max_version:
-                obj.skip("%s > %s" %(cluster_version, self.max_version))
-            f(obj)
-        wrapped.__name__ = f.__name__
-        wrapped.__doc__ = f.__doc__
-        return wrapped
-
 from dtest import DISABLE_VNODES
 # Use this decorator to skip a test when vnodes are enabled.
 class no_vnodes(object):
