@@ -44,14 +44,11 @@ class TestReplaceAddress(Tester):
         debug(numNodes)
 
         debug("Inserting Data...")
-        if cluster.version() < "2.1":
-            node1.stress(['-o', 'insert', '--num-keys=10000', '--replication-factor=3'])
-        else:
-            node1.stress(['write', 'n=10000', '-schema', 'replication(factor=3)'])
+        node1.stress(['write', 'n=10000', '-schema', 'replication(factor=3)'])
 
         cursor = self.patient_cql_connection(node1)
         cursor.default_timeout = 45
-        stress_table = 'keyspace1.standard1' if self.cluster.version() >= '2.1' else '"Keyspace1"."Standard1"'
+        stress_table = 'keyspace1.standard1'
         query = SimpleStatement('select * from %s LIMIT 1' % stress_table, consistency_level=ConsistencyLevel.THREE)
         initialData = cursor.execute(query)
 
@@ -99,12 +96,9 @@ class TestReplaceAddress(Tester):
         [node1,node2, node3] = cluster.nodelist()
 
         debug("Inserting Data...")
-        if cluster.version() < "2.1":
-            node1.stress(['-o', 'insert', '--num-keys=10000', '--replication-factor=3'])
-        else:
-            node1.stress(['write', 'n=10000', '-schema', 'replication(factor=3)'])
+        node1.stress(['write', 'n=10000', '-schema', 'replication(factor=3)'])
         cursor = self.patient_cql_connection(node1)
-        stress_table = 'keyspace1.standard1' if self.cluster.version() >= '2.1' else '"Keyspace1"."Standard1"'
+        stress_table = 'keyspace1.standard1'
         query = SimpleStatement('select * from %s LIMIT 1' % stress_table, consistency_level=ConsistencyLevel.THREE)
         initialData = cursor.execute(query)
 
@@ -129,12 +123,9 @@ class TestReplaceAddress(Tester):
         [node1,node2, node3] = cluster.nodelist()
 
         debug("Inserting Data...")
-        if cluster.version() < "2.1":
-            node1.stress(['-o', 'insert', '--num-keys=10000', '--replication-factor=3'])
-        else:
-            node1.stress(['write', 'n=10000', '-schema', 'replication(factor=3)'])
+        node1.stress(['write', 'n=10000', '-schema', 'replication(factor=3)'])
         cursor = self.patient_cql_connection(node1)
-        stress_table = 'keyspace1.standard1' if self.cluster.version() >= '2.1' else '"Keyspace1"."Standard1"'
+        stress_table = 'keyspace1.standard1'
         query = SimpleStatement('select * from %s LIMIT 1' % stress_table, consistency_level=ConsistencyLevel.THREE)
         initialData = cursor.execute(query)
 
@@ -165,13 +156,10 @@ class TestReplaceAddress(Tester):
         debug(numNodes)
 
         debug("Inserting Data...")
-        if cluster.version() < "2.1":
-            node1.stress(['-o', 'insert', '--num-keys=10000', '--replication-factor=3'])
-        else:
-            node1.stress(['write', 'n=10000', '-schema', 'replication(factor=3)'])
+        node1.stress(['write', 'n=10000', '-schema', 'replication(factor=3)'])
 
         cursor = self.patient_cql_connection(node1)
-        stress_table = 'keyspace1.standard1' if self.cluster.version() >= '2.1' else '"Keyspace1"."Standard1"'
+        stress_table = 'keyspace1.standard1'
         query = SimpleStatement('select * from %s LIMIT 1' % stress_table, consistency_level=ConsistencyLevel.THREE)
         initialData = cursor.execute(query)
 

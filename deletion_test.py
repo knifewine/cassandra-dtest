@@ -26,8 +26,6 @@ class TestDeletion(Tester):
 
         cursor.execute('delete from cf where key=1')
         result = cursor.execute('select * from cf;')
-        if cluster.version() < '1.2': # > 1.2 doesn't show tombstones
-            assert len(result) == 2 and len(result[0]) == 1 and len(result[1]) == 1, result
 
         node1.flush()
         time.sleep(.5)

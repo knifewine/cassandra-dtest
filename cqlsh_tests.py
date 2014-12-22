@@ -468,12 +468,8 @@ VALUES (4, blobAsInt(0x), '', blobAsBigint(0x), 0x, blobAsBoolean(0x), blobAsDec
         cli = os.path.join(cdir, 'bin', common.platform_binary('cqlsh'))
         env = common.make_cassandra_env(cdir, node.get_path())
         env['LANG'] = 'en_US.UTF-8'
-        if LooseVersion(self.cluster.version()) >= LooseVersion('2.1'):
-            host = node.network_interfaces['binary'][0]
-            port = node.network_interfaces['binary'][1]
-        else:
-            host = node.network_interfaces['thrift'][0]
-            port = node.network_interfaces['thrift'][1]
+        host = node.network_interfaces['binary'][0]
+        port = node.network_interfaces['binary'][1]
         args = cqlsh_options + [ host, str(port) ]
         sys.stdout.flush()
         p = subprocess.Popen([ cli ] + args, env=env, stdin=subprocess.PIPE, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
