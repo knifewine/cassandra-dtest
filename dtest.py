@@ -146,10 +146,6 @@ class Tester(TestCase):
         else:
             cluster.set_configuration_options(values={'initial_token': None, 'num_tokens': NUM_TOKENS})
 
-        if cluster.version() >= "2.1":
-            if OFFHEAP_MEMTABLES:
-                cluster.set_configuration_options(values={'memtable_allocation_type': 'offheap_objects'})
-
         return cluster
 
     def _cleanup_cluster(self):
@@ -253,12 +249,7 @@ class Tester(TestCase):
         node_ip = self.get_ip_from_node(node)
 
         if protocol_version is None:
-            if self.cluster.version() >= '2.1':
-                protocol_version = 3
-            elif self.cluster.version() >= '2.0':
-                protocol_version = 2
-            else:
-                protocol_version = 1
+            protocol_version = 2
 
         if user is None:
             cluster = PyCluster([node_ip], compression=compression, protocol_version=protocol_version)
@@ -278,12 +269,7 @@ class Tester(TestCase):
         node_ip = self.get_ip_from_node(node)
 
         if protocol_version is None:
-            if self.cluster.version() >= '2.1':
-                protocol_version = 3
-            elif self.cluster.version() >= '2.0':
-                protocol_version = 2
-            else:
-                protocol_version = 1
+            protocol_version = 2
 
         wlrr = WhiteListRoundRobinPolicy([node_ip])
         if user is None:
@@ -376,9 +362,8 @@ class Tester(TestCase):
             query = '%s AND read_repair_chance=%f' % (query, read_repair)
         if gc_grace is not None:
             query = '%s AND gc_grace_seconds=%d' % (query, gc_grace)
-        if self.cluster.version() >= "2.0":
-            if speculative_retry is not None:
-                query = '%s AND speculative_retry=\'%s\'' % (query, speculative_retry)
+        if speculative_retry is not None:
+            query = '%s AND speculative_retry=\'%s\'' % (query, speculative_retry)
 
         session.execute(query)
         time.sleep(0.2)
@@ -490,10 +475,7 @@ class Tester(TestCase):
         return node_ip
 
     def get_auth_provider(self, user, password):
-        if self.cluster.version() >= '2.0':
-            return PlainTextAuthProvider(username=user, password=password)
-        else:
-            return self.make_auth(user, password)
+        return PlainTextAuthProvider(username=user, password=password)
 
     def make_auth(self, user, password):
         def private_auth(node_ip):

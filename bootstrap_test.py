@@ -61,19 +61,15 @@ class TestBootstrap(Tester):
         """Test bootstrapped node sees existing data, eg. CASSANDRA-6648"""
         cluster = self.cluster
         cluster.populate(3)
-        version = cluster.version()
         cluster.start()
 
         node1 = cluster.nodes['node1']
-        if version < "2.1":
-            node1.stress(['-n', '10000'])
-        else:
-            node1.stress(['write', 'n=10000', '-rate', 'threads=8'])
+        node1.stress(['-n', '10000'])
 
         node4 = new_node(cluster)
         node4.start()
 
         session = self.patient_cql_connection(node4)
-        stress_table = 'keyspace1.standard1' if self.cluster.version() >= '2.1' else '"Keyspace1"."Standard1"'
+        stress_table = '"Keyspace1"."Standard1"'
         rows = session.execute('select * from %s limit 10' % stress_table)
         assert len(list(rows)) == 10

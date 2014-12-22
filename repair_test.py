@@ -88,11 +88,7 @@ class TestRepair(Tester):
 
         # Validate that only one range was transfered
         l = node1.grep_log("/([0-9.]+) and /([0-9.]+) have ([0-9]+) range\(s\) out of sync")
-        if cluster.version() > "1":
-            assert len(l) == 2, "Lines matching: " + str([elt[0] for elt in l])
-        else:
-            # In pre-1.0, we should have only one line
-            assert len(l) == 1, "Lines matching: " + str([elt[0] for elt in l])
+        assert len(l) == 2, "Lines matching: " + str([elt[0] for elt in l])
         valid = [(node1.address(), node3.address()), (node3.address(), node1.address()),
                  (node2.address(), node3.address()), (node3.address(), node2.address())]
         for line, m in l:

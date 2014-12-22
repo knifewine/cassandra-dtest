@@ -76,12 +76,6 @@ def putget(cluster, cursor, cl=ConsistencyLevel.QUORUM):
 
     # reads by name
     ks = [ "\'c%02d\'" % i for i in xrange(0, 100) ]
-    # We do not support proper IN queries yet
-    #if cluster.version() >= "1.2":
-    #    cursor.execute('SELECT * FROM cf USING CONSISTENCY %s WHERE key=\'k0\' AND c IN (%s)' % (cl, ','.join(ks)))
-    #else:
-    #    cursor.execute('SELECT %s FROM cf USING CONSISTENCY %s WHERE key=\'k0\'' % (','.join(ks), cl))
-    #_validate_row(cluster, cursor)
     # slice reads
     query = SimpleStatement('SELECT * FROM cf WHERE key=\'k0\'', consistency_level=cl)
     rows = cursor.execute(query)

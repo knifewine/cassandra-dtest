@@ -57,11 +57,7 @@ class TestSSTableGenerationAndLoading(Tester):
         # Makinge sure the cluster is ready to accept the subsequent
         # stress connection. This was an issue on Windows.
         node1.watch_log_for('thrift clients...')
-        version = cluster.version()
-        if version < "2.1":
-            node1.stress(['--num-keys=10000'])
-        else:
-            node1.stress(['write', 'n=10000', '-rate', 'threads=8'])
+        node1.stress(['--num-keys=10000'])
         node1.flush()
         node1.compact()
         node1.stop()
